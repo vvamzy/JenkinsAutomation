@@ -1,31 +1,29 @@
 pipeline {
     agent any
 	tools {
-	    maven "3.6.3"
+	    maven "3.8.5"
 	 	}
 	stages {
 	    stage('Git CheckOut') {
 		    steps {
-			   git branch: 'main', credentialsId: 'My private token login creds', url: 'https://github.com/logicopslab/WebAppForJenkins.git'
+			   git branch: 'main', url: 'https://github.com/logicopslab/WebAppForJenkins.git'
 			}
 		}
         stage('Clean and Install') {
             steps {
-                bat 'mvn clean install'
+                sh 'mvn clean install'
             }
         }
         stage ('Package'){
             steps {
-                bat 'mvn package'
+                sh 'mvn package'
              }
         }
 	stage ('Server'){
             steps {
                rtServer (
-                 id: "Artifactory",
-                 url: 'http://localhost:8082/artifactory',
-                 username: 'ravish',
-                  password: 'YouPasswordHere',
+                 id: "Jfrog",
+                 url: 'https://vamsijfrog.jfrog.io/',
                   bypassProxy: true,
                    timeout: 300
                         )
@@ -34,12 +32,12 @@ pipeline {
         stage('Upload'){
             steps{
                 rtUpload (
-                 serverId:"Artifactory" ,
+                 serverId:"Jfrog" ,
                   spec: '''{
                    "files": [
                       {
                       "pattern": "*.war",
-                      "target": "logic-ops-lab-libs-snapshot-local"
+                      "target": "jenkinsbuild-libs-release"
                       }
                             ]
                            }''',
@@ -49,7 +47,7 @@ pipeline {
         stage ('Publish build info') {
             steps {
                 rtPublishBuildInfo (
-                    serverId: "Artifactory"
+                    serverId: "Jfrog"
                 )
             }
         }
