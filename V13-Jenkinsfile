@@ -20,7 +20,7 @@ pipeline {
             steps {
                rtServer (
                  id: "Jfrog",
-                 url: 'https://vamsijfrog.jfrog.io/',
+                 url: 'https://vamsijfrog.jfrog.io/artifactory',
                   bypassProxy: true,
                    timeout: 300
                         )
